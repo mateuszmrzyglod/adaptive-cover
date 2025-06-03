@@ -361,33 +361,23 @@ class ClimateCoverState(NormalCoverState):
     def normal_with_presence(self) -> int:
         """Determine state for horizontal and vertical covers with occupants."""
 
-        # Check if it's not summer and either lux, irradiance or sunny weather is present
-        if not self.climate_data.is_summer and (
-            self.climate_data.lux
-            or self.climate_data.irradiance
-            or not self.climate_data.is_sunny
-        ):
-            # If it's winter and the cover is valid, return 100
-            if self.climate_data.is_winter and self.cover.valid:
-                return 100
-            # Otherwise, return the default cover state
-            return self.cover.default
+        direct_sun_rays = not self.climate_data.lux
 
-        # If it's summer and there's a transparent blind, return 0
-        if self.climate_data.is_summer and self.climate_data.transparent_blind:
-            return 0
+        result = super().get_state() if self.cover.valid and direct_sun_rays else self.cover.default
 
-        # If none of the above conditions are met, get the state from the parent class
-        return super().get_state()
+        if self.cover.apply_max_position and result > self.cover.max_pos:
+            return self.cover.max_pos
+        if self.cover.apply_min_position and result < self.cover.min_pos:
+            return self.cover.min_pos
+        return result
 
     def normal_without_presence(self) -> int:
         """Determine state for horizontal and vertical covers without occupants."""
-        if self.cover.valid:
-            if self.climate_data.is_summer:
-                return 0
-            if self.climate_data.is_winter:
-                return 100
-        return self.cover.default
+        direct_sun_rays = not self.climate_data.lux
+
+        if self.climate_data.is_winter and self.cover.valid and direct_sun_rays:
+            return 100
+        return 0
 
     def tilt_with_presence(self, degrees: int) -> int:
         """Determine state for tilted blinds with occupants."""
@@ -426,15 +416,7 @@ class ClimateCoverState(NormalCoverState):
 
     def get_state(self) -> int:
         """Return state."""
-        result = self.normal_type_cover()
-        if self.climate_data.blind_type == "cover_tilt":
-            result = self.tilt_state()
-        if self.cover.apply_max_position and result > self.cover.max_pos:
-            return self.cover.max_pos
-        if self.cover.apply_min_position and result < self.cover.min_pos:
-            return self.cover.min_pos
-        return result
-
+        return self.normal_type_cover()
 
 @dataclass
 class AdaptiveVerticalCover(AdaptiveGeneralCover):

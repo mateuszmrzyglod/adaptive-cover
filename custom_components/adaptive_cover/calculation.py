@@ -363,13 +363,7 @@ class ClimateCoverState(NormalCoverState):
 
         direct_sun_rays = not self.climate_data.lux
 
-        result = super().get_state() if self.cover.valid and direct_sun_rays else self.cover.default
-
-        if self.cover.apply_max_position and result > self.cover.max_pos:
-            return self.cover.max_pos
-        if self.cover.apply_min_position and result < self.cover.min_pos:
-            return self.cover.min_pos
-        return result
+        return super().get_state() if self.cover.valid and direct_sun_rays else self.cover.default
 
     def normal_without_presence(self) -> int:
         """Determine state for horizontal and vertical covers without occupants."""
@@ -416,7 +410,15 @@ class ClimateCoverState(NormalCoverState):
 
     def get_state(self) -> int:
         """Return state."""
-        return self.normal_type_cover()
+        result = self.normal_type_cover()
+        if self.climate_data.blind_type == "cover_tilt":
+            result = self.tilt_state()
+        if self.cover.apply_max_position and result > self.cover.max_pos:
+            return self.cover.max_pos
+        if self.cover.apply_min_position and result < self.cover.min_pos:
+            return self.cover.min_pos
+        return result
+
 
 @dataclass
 class AdaptiveVerticalCover(AdaptiveGeneralCover):

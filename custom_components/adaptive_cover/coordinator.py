@@ -701,7 +701,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             state = inverse_state(state)
 
         _LOGGER.debug("Calculated position: %s", state)
-        return state
+        return round(state)
 
     def interpolate_states(self, state):
         """Interpolate states."""

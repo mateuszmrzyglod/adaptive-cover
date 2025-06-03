@@ -116,7 +116,7 @@ OPTIONS = vol.Schema(
         ),
         vol.Optional(CONF_ENABLE_MAX_POSITION, default=False): bool,
         vol.Optional(CONF_MIN_POSITION): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=99)
+            vol.Coerce(int), vol.Range(min=0, max=100)
         ),
         vol.Optional(CONF_ENABLE_MIN_POSITION, default=False): bool,
         vol.Optional(CONF_MIN_ELEVATION): vol.All(

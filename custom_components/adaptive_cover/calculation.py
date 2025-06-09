@@ -195,7 +195,7 @@ class NormalCoverState:
 
     cover: AdaptiveGeneralCover
 
-    def get_state(self) -> int:
+    def get_state(self, presence=None) -> int:
         """Return state."""
         state = np.where(
             self.cover.direct_sun_valid,
@@ -203,9 +203,9 @@ class NormalCoverState:
             self.cover.default,
         )
         result = np.clip(state, 0, 100)
-        if self.cover.apply_max_position and result > self.cover.max_pos:
+        if self.cover.apply_max_position and result and presence > self.cover.max_pos:
             return self.cover.max_pos
-        if self.cover.apply_min_position and result < self.cover.min_pos:
+        if self.cover.apply_min_position and result and presence < self.cover.min_pos:
             return self.cover.min_pos
         return result
 
@@ -363,7 +363,7 @@ class ClimateCoverState(NormalCoverState):
 
         direct_sun_rays = not self.climate_data.lux
 
-        return super().get_state() if self.cover.valid and direct_sun_rays else self.cover.default
+        return super().get_state(presence=True) if self.cover.valid and direct_sun_rays else self.cover.default
 
     def normal_without_presence(self) -> int:
         """Determine state for horizontal and vertical covers without occupants."""
@@ -383,7 +383,7 @@ class ClimateCoverState(NormalCoverState):
             if self.climate_data.is_summer:
                 # If it's summer, return 45 degrees
                 return 45 / degrees * 100
-            return super().get_state()
+            return super().get_state(presence=True)
         return 80 / degrees * 100
 
     def tilt_without_presence(self, degrees: int) -> int:
@@ -408,14 +408,14 @@ class ClimateCoverState(NormalCoverState):
             return self.tilt_with_presence(degrees)
         return self.tilt_without_presence(degrees)
 
-    def get_state(self) -> int:
+    def get_state(self, presence=None) -> int:
         """Return state."""
         result = self.normal_type_cover()
         if self.climate_data.blind_type == "cover_tilt":
             result = self.tilt_state()
-        if self.cover.apply_max_position and result > self.cover.max_pos:
+        if self.cover.apply_max_position and result and presence > self.cover.max_pos:
             return self.cover.max_pos
-        if self.cover.apply_min_position and result < self.cover.min_pos:
+        if self.cover.apply_min_position and result and presence < self.cover.min_pos:
             return self.cover.min_pos
         return result
 

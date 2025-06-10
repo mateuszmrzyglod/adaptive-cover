@@ -203,9 +203,9 @@ class NormalCoverState:
             self.cover.default,
         )
         result = np.clip(state, 0, 100)
-        if self.cover.apply_max_position and result and presence > self.cover.max_pos:
+        if self.cover.apply_max_position and presence and result > self.cover.max_pos:
             return self.cover.max_pos
-        if self.cover.apply_min_position and result and presence < self.cover.min_pos:
+        if self.cover.apply_min_position and presence and result < self.cover.min_pos:
             return self.cover.min_pos
         return result
 
@@ -413,9 +413,9 @@ class ClimateCoverState(NormalCoverState):
         result = self.normal_type_cover()
         if self.climate_data.blind_type == "cover_tilt":
             result = self.tilt_state()
-        if self.cover.apply_max_position and result and presence > self.cover.max_pos:
+        if self.cover.apply_max_position and presence and result> self.cover.max_pos:
             return self.cover.max_pos
-        if self.cover.apply_min_position and result and presence < self.cover.min_pos:
+        if self.cover.apply_min_position and presence and result < self.cover.min_pos:
             return self.cover.min_pos
         return result
 
